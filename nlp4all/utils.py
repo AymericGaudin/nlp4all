@@ -198,6 +198,43 @@ def twitter_date_to_unix(date_str):
         unix_time = time.mktime(datetime.strptime(date_str, date_rep).timetuple())
         return(datetime.fromtimestamp(unix_time))
 
+
+def  get_user_project_analyses(a_user, a_project):
+        return BayesianAnalysis.query.filter_by(project=a_project.id)
+
+
+def add_tweet_from_raw_dict(indict, category):
+        timestamp = twitter_date_to_unix(indict['created_at'])
+        full_text = ""
+        if 'retweet_status' in indict.keys():
+                full_text = indict['retweet_status']['full_text']
+        else:
+                full_text = indict['full_text']
+        t = full_text
+        links = [w for w in full_text.split() if "http" in w],
+        hashtags = [w for w in full_text.split() if "#" in w],
+        mentions = [w for w in full_text.split() if "@" in w],
+        tweet_parts = [clean_word(w) for w in full_text.split()]
+        full_text=" ".join([w for w in tweet_parts])
+        t = clean_non_transparencynum(remove_hash_links_mentions(t))
+        words = t.split()
+        a_tweet = Tweet(
+                time_posted = timestamp,
+                category = category.id,
+                handle = category.name,
+                full_text= full_text,
+                words = words,
+                links = links,
+                hashtags = hashtags,
+                mentions = mentions,
+                url = "https://twitter.com/"+category.name+"/status/"+str(indict['id']),
+                text = " ".join([clean_word(word) for word in t.split()])
+        )
+        db.session.add(a_tweet)
+        db.session.commit()
+
+
+
 def add_tweet_from_dict(indict, category):
         timestamp = twitter_date_to_unix(indict['time'])
         full_text = indict['full_text']
