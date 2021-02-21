@@ -8,6 +8,7 @@ import operator
 from nlp4all import db
 import random, itertools
 from nlp4all.models import BayesianAnalysis, BayesianRobot
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from flask_login import current_user
 
@@ -162,7 +163,6 @@ def  get_user_projects(a_user):
         return(my_projects)
 
 def add_project(name, description, org, cat_ids):
-        print(description)
         cats_objs = TweetTagCategory.query.filter(TweetTagCategory.id.in_(cat_ids)).all()
         tweet_objs = [t for cat in cats_objs for t in cat.tweets]
         tf_idf = tf_idf_from_tweets_and_cats_objs(tweet_objs, cats_objs)
@@ -232,6 +232,14 @@ def tf_idf_from_tweets_and_cats_objs(tweets, cats):
                         the_list.append((tweet.id, tweet.category))
                         tf_idf['words'][word] = the_list
         return tf_idf
+
+def tf_idf_array(tweets, cats):
+        tf_idf_vectorizer = TfidfVectorizer() 
+        all_text = [t.full_text for t in tweets]
+        tfidf_matrix = tf_idf_vectorizer.fit_transform(all_text)
+        return(tf_idf_vectorizer.get_feature_names(), tfidf_matrix)
+
+
 
 def twitter_date_to_unix(date_str):
         date_rep = '%a %b %d %H:%M:%S %z %Y'
