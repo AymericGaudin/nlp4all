@@ -237,7 +237,7 @@ def tf_idf_array(tweets, cats):
         tf_idf_vectorizer = TfidfVectorizer() 
         all_text = [t.full_text for t in tweets]
         tfidf_matrix = tf_idf_vectorizer.fit_transform(all_text)
-        return(tf_idf_vectorizer.get_feature_names(), tfidf_matrix)
+        return(tf_idf_vectorizer.get_feature_names(), tf_idf.vectorizer.idf_, tfidf_matrix)# returns feature names, idf, and the doc term matrix
 
 
 
